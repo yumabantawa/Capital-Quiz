@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Capital Quiz — Atlas Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Space+Mono:wght@400;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #16233F;
+    --navy-deep: #0F1930;
+    --parchment: #F1E9D8;
+    --parchment-line: #D8CBAA;
+    --brass: #B8912F;
+    --brass-light: #D9B45C;
+    --stamp-red: #A6423D;
+    --stamp-green: #3F6E52;
+    --ink: #221F1A;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--navy-deep);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(184,145,47,0.08), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(184,145,47,0.06), transparent 45%);
+    font-family: 'Source Sans 3', sans-serif;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .wrap { width: 100%; max-width: 640px; }
+
+  .eyebrow {
+    text-align: center;
+    color: var(--brass-light);
+    font-family: 'Space Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  h1.title {
+    text-align: center;
+    color: var(--parchment);
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(32px, 6vw, 48px);
+    margin: 0 0 6px 0;
+    letter-spacing: 0.01em;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #93A0BE;
+    font-size: 15px;
+    margin: 0 0 30px 0;
+    font-style: italic;
+  }
+
+  .card {
+    background: var(--parchment);
+    border-radius: 3px;
+    padding: 40px 36px 34px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    background-image:
+      linear-gradient(var(--parchment), var(--parchment)),
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(184,145,47,0.08) 28px);
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 10px;
+    border: 1px solid var(--parchment-line);
+    pointer-events: none;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8A7C5A;
+    margin-bottom: 26px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stat-row span b {
+    color: var(--ink);
+    font-size: 16px;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .prompt-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .country-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: clamp(30px, 6vw, 42px);
+    line-height: 1.1;
+    margin: 0 0 28px 0;
+    color: var(--ink);
+    position: relative;
+    z-index: 1;
+  }
+
+  form { position: relative; z-index: 1; }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 17px;
+    padding: 13px 16px;
+    border: 1.5px solid #C9BB98;
+    border-radius: 2px;
+    background: #FBF7EE;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  input[type="text"]:focus {
+    border-color: var(--brass);
+  }
+
+  input[type="text"]:disabled {
+    opacity: 0.6;
+  }
+
+  button {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0 22px;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+
+  button:active { transform: translateY(1px); }
+
+  .btn-submit {
+    background: var(--navy);
+    color: var(--parchment);
+  }
+  .btn-submit:hover { background: var(--navy-deep); }
+  .btn-submit:disabled { opacity: 0.5; cursor: default; }
+
+  .btn-skip {
+    background: transparent;
+    color: #8A7C5A;
+    border: 1px solid #C9BB98;
+    font-size: 11.5px;
+    padding: 8px 14px;
+    margin-top: 12px;
+  }
+  .btn-skip:hover { background: rgba(184,145,47,0.08); }
+
+  .feedback {
+    min-height: 32px;
+    margin-top: 16px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stamp {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    padding: 3px 9px;
+    transform: rotate(-3deg);
+    animation: stampIn 0.22s ease-out;
+  }
+
+  .stamp.correct { color: var(--stamp-green); }
+  .stamp.incorrect { color: var(--stamp-red); }
+
+  @keyframes stampIn {
+    from { transform: rotate(-3deg) scale(1.6); opacity: 0; }
+    to { transform: rotate(-3deg) scale(1); opacity: 1; }
+  }
+
+  .feedback-text { color: #5A5040; }
+
+  .end-screen {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .end-screen .big-score {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 56px;
+    color: var(--navy);
+    margin: 10px 0 0 0;
+  }
+
+  .end-screen .accuracy {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 26px;
+  }
+
+  .btn-restart {
+    background: var(--navy);
+    color: var(--parchment);
+    padding: 12px 26px;
+  }
+  .btn-restart:hover { background: var(--navy-deep); }
+
+  .footer-note {
+    text-align: center;
+    color: #5C6A8C;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    margin-top: 22px;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 30px 22px 26px; }
+    .input-row { flex-direction: column; }
+    button.btn-submit { padding: 13px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stamp { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">Field Edition · No. 001</div>
+  <h1 class="title">Capital Quiz</h1>
+  <p class="subtitle">Name the capital of every country in the atlas.</p>
+
+  <div class="card">
+    <div class="stat-row" id="statRow">
+      <span>Score <b id="scoreVal">0</b></span>
+      <span>Asked <b id="askedVal">0</b></span>
+      <span>Accuracy <b id="accVal">—</b></span>
+    </div>
+
+    <div id="quizArea">
+      <div class="prompt-label">What is the capital of</div>
+      <h2 class="country-name" id="countryName">—</h2>
+
+      <form id="answerForm">
+        <div class="input-row">
+          <input type="text" id="answerInput" placeholder="Type your answer…" autocomplete="off" />
+          <button type="submit" class="btn-submit" id="submitBtn">Submit</button>
+        </div>
+      </form>
+      <button class="btn-skip" id="skipBtn">Skip this one →</button>
+
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="end-screen" id="endScreen" style="display:none;">
+      <div class="prompt-label" style="text-align:center;">Final Score</div>
+      <p class="big-score" id="finalScore">0</p>
+      <p class="accuracy" id="finalAccuracy">0% accuracy</p>
+      <button class="btn-restart" id="restartBtn">Play Again</button>
+    </div>
+  </div>
+
+  <p class="footer-note">Press Enter to submit · Type "exit" to end the quiz</p>
+</div>
+
+<script>
+const countriesAndCapitals = [
+  ["Afghanistan", "Kabul"],
+  ["Albania", "Tirana"],
+  ["Algeria", "Algiers"],
+  ["Andorra", "Andorra la Vella"],
+  ["Angola", "Luanda"],
+  ["Antigua and Barbuda", "Saint John's"],
+  ["Argentina", "Buenos Aires"],
+  ["Armenia", "Yerevan"],
+  ["Australia", "Canberra"],
+  ["Austria", "Vienna"],
+  ["Azerbaijan", "Baku"],
+  ["Bahamas", "Nassau"],
+  ["Bahrain", "Manama"],
+  ["Bangladesh", "Dhaka"],
+  ["Barbados", "Bridgetown"],
+  ["Belarus", "Minsk"],
+  ["Belgium", "Brussels"],
+  ["Belize", "Belmopan"],
+  ["Benin", "Porto-Novo"],
+  ["Bhutan", "Thimphu"],
+  ["Bolivia", "Sucre"],
+  ["Bosnia and Herzegovina", "Sarajevo"],
+  ["Botswana", "Gaborone"],
+  ["Brazil", "Brasilia"],
+  ["Brunei", "Bandar Seri Begawan"],
+  ["Bulgaria", "Sofia"],
+  ["Burkina Faso", "Ouagadougou"],
+  ["Burundi", "Gitega"],
+  ["Cabo Verde", "Praia"],
+  ["Cambodia", "Phnom Penh"],
+  ["Cameroon", "Yaounde"],
+  ["Canada", "Ottawa"],
+  ["Central African Republic", "Bangui"],
+  ["Chad", "N'Djamena"],
+  ["Chile", "Santiago"],
+  ["China", "Beijing"],
+  ["Colombia", "Bogota"],
+  ["Comoros", "Moroni"],
+  ["Congo", "Brazzaville"],
+  ["Costa Rica", "San Jose"],
+  ["Croatia", "Zagreb"],
+  ["Cuba", "Havana"],
+  ["Cyprus", "Nicosia"],
+  ["Czech Republic", "Prague"],
+  ["Democratic Republic of the Congo", "Kinshasa"],
+  ["Denmark", "Copenhagen"],
+  ["Djibouti", "Djibouti"],
+  ["Dominica", "Roseau"],
+  ["Dominican Republic", "Santo Domingo"],
+  ["Ecuador", "Quito"],
+  ["Egypt", "Cairo"],
+  ["El Salvador", "San Salvador"],
+  ["Equatorial Guinea", "Malabo"],
+  ["Eritrea", "Asmara"],
+  ["Estonia", "Tallinn"],
+  ["Eswatini", "Mbabane"],
+  ["Ethiopia", "Addis Ababa"],
+  ["Fiji", "Suva"],
+  ["Finland", "Helsinki"],
+  ["France", "Paris"],
+  ["Gabon", "Libreville"],
+  ["Gambia", "Banjul"],
+  ["Georgia", "Tbilisi"],
+  ["Germany", "Berlin"],
+  ["Ghana", "Accra"],
+  ["Greece", "Athens"],
+  ["Grenada", "Saint George's"],
+  ["Guatemala", "Guatemala City"],
+  ["Guinea", "Conakry"],
+  ["Guinea-Bissau", "Bissau"],
+  ["Guyana", "Georgetown"],
+  ["Haiti", "Port-au-Prince"],
+  ["Honduras", "Tegucigalpa"],
+  ["Hungary", "Budapest"],
+  ["Iceland", "Reykjavik"],
+  ["India", "New Delhi"],
+  ["Indonesia", "Jakarta"],
+  ["Iran", "Tehran"],
+  ["Iraq", "Baghdad"],
+  ["Ireland", "Dublin"],
+  ["Israel", "Jerusalem"],
+  ["Italy", "Rome"],
+  ["Ivory Coast", "Yamoussoukro"],
+  ["Jamaica", "Kingston"],
+  ["Japan", "Tokyo"],
+  ["Jordan", "Amman"],
+  ["Kazakhstan", "Astana"],
+  ["Kenya", "Nairobi"],
+  ["Kiribati", "South Tarawa"],
+  ["Kuwait", "Kuwait City"],
+  ["Kyrgyzstan", "Bishkek"],
+  ["Laos", "Vientiane"],
+  ["Latvia", "Riga"],
+  ["Lebanon", "Beirut"],
+  ["Lesotho", "Maseru"],
+  ["Liberia", "Monrovia"],
+  ["Libya", "Tripoli"],
+  ["Liechtenstein", "Vaduz"],
+  ["Lithuania", "Vilnius"],
+  ["Luxembourg", "Luxembourg"],
+  ["Madagascar", "Antananarivo"],
+  ["Malawi", "Lilongwe"],
+  ["Malaysia", "Kuala Lumpur"],
+  ["Maldives", "Male"],
+  ["Mali", "Bamako"],
+  ["Malta", "Valletta"],
+  ["Marshall Islands", "Majuro"],
+  ["Mauritania", "Nouakchott"],
+  ["Mauritius", "Port Louis"],
+  ["Mexico", "Mexico City"],
+  ["Micronesia", "Palikir"],
+  ["Moldova", "Chisinau"],
+  ["Monaco", "Monaco"],
+  ["Mongolia", "Ulaanbaatar"],
+  ["Montenegro", "Podgorica"],
+  ["Morocco", "Rabat"],
+  ["Mozambique", "Maputo"],
+  ["Myanmar", "Naypyidaw"],
+  ["Namibia", "Windhoek"],
+  ["Nauru", "Yaren"],
+  ["Nepal", "Kathmandu"],
+  ["Netherlands", "Amsterdam"],
+  ["New Zealand", "Wellington"],
+  ["Nicaragua", "Managua"],
+  ["Niger", "Niamey"],
+  ["Nigeria", "Abuja"],
+  ["North Korea", "Pyongyang"],
+  ["North Macedonia", "Skopje"],
+  ["Norway", "Oslo"],
+  ["Oman", "Muscat"],
+  ["Pakistan", "Islamabad"],
+  ["Palau", "Ngerulmud"],
+  ["Palestine", "East Jerusalem"],
+  ["Panama", "Panama City"],
+  ["Papua New Guinea", "Port Moresby"],
+  ["Paraguay", "Asuncion"],
+  ["Peru", "Lima"],
+  ["Philippines", "Manila"],
+  ["Poland", "Warsaw"],
+  ["Portugal", "Lisbon"],
+  ["Qatar", "Doha"],
+  ["Romania", "Bucharest"],
+  ["Russia", "Moscow"],
+  ["Rwanda", "Kigali"],
+  ["Saint Kitts and Nevis", "Basseterre"],
+  ["Saint Lucia", "Castries"],
+  ["Saint Vincent and the Grenadines", "Kingstown"],
+  ["Samoa", "Apia"],
+  ["San Marino", "San Marino"],
+  ["Sao Tome and Principe", "Sao Tome"],
+  ["Saudi Arabia", "Riyadh"],
+  ["Senegal", "Dakar"],
+  ["Serbia", "Belgrade"],
+  ["Seychelles", "Victoria"],
+  ["Sierra Leone", "Freetown"],
+  ["Singapore", "Singapore"],
+  ["Slovakia", "Bratislava"],
+  ["Slovenia", "Ljubljana"],
+  ["Solomon Islands", "Honiara"],
+  ["Somalia", "Mogadishu"],
+  ["South Africa", "Pretoria"],
+  ["South Korea", "Seoul"],
+  ["South Sudan", "Juba"],
+  ["Spain", "Madrid"],
+  ["Sri Lanka", "Sri Jayawardenepura Kotte"],
+  ["Sudan", "Khartoum"],
+  ["Suriname", "Paramaribo"],
+  ["Sweden", "Stockholm"],
+  ["Switzerland", "Bern"],
+  ["Syria", "Damascus"],
+  ["Taiwan", "Taipei"],
+  ["Tajikistan", "Dushanbe"],
+  ["Tanzania", "Dodoma"],
+  ["Thailand", "Bangkok"],
+  ["Timor-Leste", "Dili"],
+  ["Togo", "Lome"],
+  ["Tonga", "Nuku'alofa"],
+  ["Trinidad and Tobago", "Port of Spain"],
+  ["Tunisia", "Tunis"],
+  ["Turkey", "Ankara"],
+  ["Turkmenistan", "Ashgabat"],
+  ["Tuvalu", "Funafuti"],
+  ["Uganda", "Kampala"],
+  ["Ukraine", "Kyiv"],
+  ["United Arab Emirates", "Abu Dhabi"],
+  ["United Kingdom", "London"],
+  ["United States", "Washington, D.C."],
+  ["Uruguay", "Montevideo"],
+  ["Uzbekistan", "Tashkent"],
+  ["Vanuatu", "Port Vila"],
+  ["Vatican City", "Vatican City"],
+  ["Venezuela", "Caracas"],
+  ["Vietnam", "Hanoi"],
+  ["Yemen", "Sanaa"],
+  ["Zambia", "Lusaka"],
+  ["Zimbabwe", "Harare"]
+];
+
+let pool = [];
+let current = null;
+let score = 0;
+let asked = 0;
+
+const countryNameEl = document.getElementById('countryName');
+const answerInput = document.getElementById('answerInput');
+const answerForm = document.getElementById('answerForm');
+const submitBtn = document.getElementById('submitBtn');
+const skipBtn = document.getElementById('skipBtn');
+const feedbackEl = document.getElementById('feedback');
+const scoreVal = document.getElementById('scoreVal');
+const askedVal = document.getElementById('askedVal');
+const accVal = document.getElementById('accVal');
+const quizArea = document.getElementById('quizArea');
+const endScreen = document.getElementById('endScreen');
+const finalScore = document.getElementById('finalScore');
+const finalAccuracy = document.getElementById('finalAccuracy');
+const restartBtn = document.getElementById('restartBtn');
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  pool = shuffle(countriesAndCapitals);
+  score = 0;
+  asked = 0;
+  updateStats();
+  quizArea.style.display = 'block';
+  endScreen.style.display = 'none';
+  feedbackEl.innerHTML = '';
+  nextQuestion();
+}
+
+function nextQuestion() {
+  if (pool.length === 0) {
+    pool = shuffle(countriesAndCapitals);
+  }
+  current = pool.pop();
+  countryNameEl.textContent = current[0];
+  answerInput.value = '';
+  answerInput.disabled = false;
+  submitBtn.disabled = false;
+  answerInput.focus();
+}
+
+function updateStats() {
+  scoreVal.textContent = score;
+  askedVal.textContent = asked;
+  accVal.textContent = asked > 0 ? Math.round((score / asked) * 100) + '%' : '—';
+}
+
+function showFeedback(correct, correctCapital) {
+  feedbackEl.innerHTML = '';
+  const stamp = document.createElement('span');
+  stamp.className = 'stamp ' + (correct ? 'correct' : 'incorrect');
+  stamp.textContent = correct ? 'Correct' : 'Incorrect';
+  feedbackEl.appendChild(stamp);
+
+  if (!correct) {
+    const text = document.createElement('span');
+    text.className = 'feedback-text';
+    text.textContent = 'The capital was ' + correctCapital + '.';
+    feedbackEl.appendChild(text);
+  }
+}
+
+function endGame() {
+  quizArea.style.display = 'none';
+  endScreen.style.display = 'block';
+  finalScore.textContent = score;
+  const acc = asked > 0 ? Math.round((score / asked) * 100) : 0;
+  finalAccuracy.textContent = acc + '% accuracy over ' + asked + (asked === 1 ? ' question' : ' questions');
+}
+
+answerForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const guess = answerInput.value.trim();
+
+  if (guess.toLowerCase() === 'exit') {
+    endGame();
+    return;
+  }
+
+  if (guess === '') return;
+
+  asked += 1;
+  const correct = guess.toLowerCase() === current[1].toLowerCase();
+  if (correct) score += 1;
+
+  updateStats();
+  showFeedback(correct, current[1]);
+  answerInput.disabled = true;
+  submitBtn.disabled = true;
+
+  setTimeout(nextQuestion, correct ? 700 : 1400);
+});
+
+skipBtn.addEventListener('click', function() {
+  asked += 1;
+  updateStats();
+  showFeedback(false, current[1]);
+  answerInput.disabled = true;
+  submitBtn.disabled = true;
+  setTimeout(nextQuestion, 900);
+});
+
+restartBtn.addEventListener('click', startGame);
+
+startGame();
+</script>
+
+</body>
+</html>
